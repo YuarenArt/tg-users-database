@@ -182,6 +182,50 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/users/{username}/subscription": {
+            "get": {
+                "description": "Get the subscription status of a user by their username",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get subscription status of a user by username",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Username",
+                        "name": "username",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Subscription status",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -194,7 +238,7 @@ const docTemplate = `{
                 "subscription_status": {
                     "type": "string"
                 },
-                "telegram_username": {
+                "username": {
                     "type": "string"
                 }
             }
@@ -204,12 +248,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
-	Host:             "",
-	BasePath:         "",
+	Version:          "1.0",
+	Host:             "localhost:8082",
+	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "",
-	Description:      "",
+	Title:            "User Database API",
+	Description:      "This is a sample server for managing user subscriptions.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

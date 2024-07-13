@@ -1,7 +1,7 @@
 package user
 
 type User struct {
-	ID                 int    `json:"id"`
-	TelegramUsername   string `json:"telegram_username"`
+	ID                 int64  `json:"id"`
+	TelegramUsername   string `json:"username"`
 	SubscriptionStatus string `json:"subscription_status"`
 }

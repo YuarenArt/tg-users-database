@@ -43,6 +43,7 @@ func (h *UserHandler) setupRouter() {
 		userRoutes.GET("/:username", h.getUser)
 		userRoutes.PUT("/:username", h.updateUser)
 		userRoutes.DELETE("/:username", h.deleteUser)
+		userRoutes.GET("/:username/subscription", h.getSubscriptionStatus)
 	}
 
 	// Swagger endpoint
@@ -157,4 +158,29 @@ func (h *UserHandler) deleteUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusNoContent, nil)
+}
+
+// getSubscriptionStatus handles retrieving the subscription status of a user by username.
+// @Summary Get subscription status of a user by username
+// @Description Get the subscription status of a user by their username
+// @Produce json
+// @Param username path string true "Username"
+// @Success 200 {string} string "Subscription status"
+// @Failure 400 string error message
+// @Failure 404 string error message
+// @Failure 500 string error message
+// @Router /users/{username}/subscription [get]
+func (h *UserHandler) getSubscriptionStatus(c *gin.Context) {
+	username := c.Param("username")
+
+	ctx, cancel := context.WithTimeout(c.Request.Context(), timeoutToContext)
+	defer cancel()
+
+	status, err := h.Database.SubscriptionStatus(ctx, username)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, status)
 }

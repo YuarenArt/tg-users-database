@@ -22,7 +22,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to connect to the database: %v", err)
 	}
-
 	// Initialize the handler with the database
 	handler := handler.NewHandler(database)
 	if err := handler.Router.Run(":8082"); err != nil {

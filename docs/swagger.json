@@ -1,8 +1,13 @@
 {
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "description": "This is a sample server for managing user subscriptions.",
+        "title": "User Database API",
+        "contact": {},
+        "version": "1.0"
     },
+    "host": "localhost:8082",
+    "basePath": "/",
     "paths": {
         "/users": {
             "post": {
@@ -171,6 +176,50 @@
                     }
                 }
             }
+        },
+        "/users/{username}/subscription": {
+            "get": {
+                "description": "Get the subscription status of a user by their username",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get subscription status of a user by username",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Username",
+                        "name": "username",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Subscription status",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -183,7 +232,7 @@
                 "subscription_status": {
                     "type": "string"
                 },
-                "telegram_username": {
+                "username": {
                     "type": "string"
                 }
             }
