@@ -183,6 +183,44 @@ const docTemplate = `{
                 }
             }
         },
+        "/users/{username}/exists": {
+            "get": {
+                "description": "Check if a user exists by their username",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Check if a user exists by username",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Username",
+                        "name": "username",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User exists or not",
+                        "schema": {
+                            "type": "bool"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/users/{username}/subscription": {
             "get": {
                 "description": "Get the subscription status of a user by their username",

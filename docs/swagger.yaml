@@ -127,6 +127,31 @@ paths:
           schema:
             type: string
       summary: Update a user's subscription status
+  /users/{username}/exists:
+    get:
+      description: Check if a user exists by their username
+      parameters:
+      - description: Username
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User exists or not
+          schema:
+            type: bool
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Check if a user exists by username
   /users/{username}/subscription:
     get:
       description: Get the subscription status of a user by their username

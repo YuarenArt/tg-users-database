@@ -44,6 +44,7 @@ func (h *UserHandler) setupRouter() {
 		userRoutes.PUT("/:username", h.updateUser)
 		userRoutes.DELETE("/:username", h.deleteUser)
 		userRoutes.GET("/:username/subscription", h.getSubscriptionStatus)
+		userRoutes.GET("/:username/exist", h.checkUserExists)
 	}
 
 	// Swagger endpoint
@@ -183,4 +184,28 @@ func (h *UserHandler) getSubscriptionStatus(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, status)
+}
+
+// checkUserExists handles checking if a user exists by username.
+// @Summary Check if a user exists by username
+// @Description Check if a user exists by their username
+// @Produce json
+// @Param username path string true "Username"
+// @Success 200 {bool} bool "User exists or not"
+// @Failure 400 string error message
+// @Failure 500 string error message
+// @Router /users/{username}/exists [get]
+func (h *UserHandler) checkUserExists(c *gin.Context) {
+	username := c.Param("username")
+
+	ctx, cancel := context.WithTimeout(c.Request.Context(), timeoutToContext)
+	defer cancel()
+
+	exist, err := h.Database.UserExists(ctx, username)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, exist)
 }

@@ -144,6 +144,7 @@ func (db *Database) UserExists(ctx context.Context, username string) (bool, erro
 	return exists, nil
 }
 
+// SubscriptionStatus return user subscription status
 func (db *Database) SubscriptionStatus(ctx context.Context, username string) (string, error) {
 	log.Printf("Checking subscription status: %s", username)
 
