@@ -4,6 +4,10 @@
         "description": "This is a sample server for managing user subscriptions.",
         "title": "User Database API",
         "contact": {},
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
         "version": "1.0"
     },
     "host": "localhost:8082",
@@ -17,6 +21,9 @@
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "users"
                 ],
                 "summary": "Create a new user",
                 "parameters": [
@@ -55,8 +62,14 @@
         "/users/{username}": {
             "get": {
                 "description": "Get user details by username",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "users"
                 ],
                 "summary": "Get a user by username",
                 "parameters": [
@@ -103,6 +116,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "users"
+                ],
                 "summary": "Update a user's subscription status",
                 "parameters": [
                     {
@@ -148,6 +164,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "users"
+                ],
                 "summary": "Delete a user by username",
                 "parameters": [
                     {
@@ -182,6 +201,9 @@
                 "description": "Check if a user exists by their username",
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "users"
                 ],
                 "summary": "Check if a user exists by username",
                 "parameters": [
@@ -220,6 +242,9 @@
                 "description": "Get the subscription status of a user by their username",
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "users"
                 ],
                 "summary": "Get subscription status of a user by username",
                 "parameters": [
@@ -269,6 +294,10 @@
                 },
                 "subscription_status": {
                     "type": "string"
+                },
+                "traffic": {
+                    "description": "in Mb",
+                    "type": "number"
                 },
                 "username": {
                     "type": "string"

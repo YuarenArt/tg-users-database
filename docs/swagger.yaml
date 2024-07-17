@@ -6,6 +6,9 @@ definitions:
         type: integer
       subscription_status:
         type: string
+      traffic:
+        description: in Mb
+        type: number
       username:
         type: string
     type: object
@@ -13,6 +16,9 @@ host: localhost:8082
 info:
   contact: {}
   description: This is a sample server for managing user subscriptions.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
   title: User Database API
   version: "1.0"
 paths:
@@ -44,6 +50,8 @@ paths:
           schema:
             type: string
       summary: Create a new user
+      tags:
+      - users
   /users/{username}:
     delete:
       description: Delete a user by their username
@@ -67,7 +75,11 @@ paths:
           schema:
             type: string
       summary: Delete a user by username
+      tags:
+      - users
     get:
+      consumes:
+      - application/json
       description: Get user details by username
       parameters:
       - description: Username
@@ -95,6 +107,8 @@ paths:
           schema:
             type: string
       summary: Get a user by username
+      tags:
+      - users
     put:
       consumes:
       - application/json
@@ -127,6 +141,8 @@ paths:
           schema:
             type: string
       summary: Update a user's subscription status
+      tags:
+      - users
   /users/{username}/exists:
     get:
       description: Check if a user exists by their username
@@ -152,6 +168,8 @@ paths:
           schema:
             type: string
       summary: Check if a user exists by username
+      tags:
+      - users
   /users/{username}/subscription:
     get:
       description: Get the subscription status of a user by their username
@@ -181,4 +199,6 @@ paths:
           schema:
             type: string
       summary: Get subscription status of a user by username
+      tags:
+      - users
 swagger: "2.0"

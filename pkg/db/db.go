@@ -20,7 +20,8 @@ const (
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT NOT NULL UNIQUE,
-        subscription_status TEXT NOT NULL
+        subscription_status TEXT NOT NULL,
+        Traffic REAL
     );`
 
 	insertUserSQL             = "INSERT INTO users (username, subscription_status) VALUES (?, ?)"
@@ -28,7 +29,7 @@ const (
 	updateUserSQL             = "UPDATE users SET subscription_status = ? WHERE username = ?"
 	deleteUserSQL             = "DELETE FROM users WHERE username = ?"
 	userExistsSQL             = "SELECT EXISTS(SELECT 1 FROM users WHERE username = ?)"
-	userSabscriptionStatusSQL = "SELECT subscription_status FROM users WHERE username = ?"
+	userSubscriptionStatusSQL = "SELECT subscription_status FROM users WHERE username = ?"
 )
 
 // NewDatabase creates a connection with the database
@@ -149,7 +150,7 @@ func (db *Database) SubscriptionStatus(ctx context.Context, username string) (st
 	log.Printf("Checking subscription status: %s", username)
 
 	var subscriptionStatus string
-	err := db.DB.QueryRowContext(ctx, userSabscriptionStatusSQL, username).Scan(&subscriptionStatus)
+	err := db.DB.QueryRowContext(ctx, userSubscriptionStatusSQL, username).Scan(&subscriptionStatus)
 	if err != nil {
 		return "", fmt.Errorf("failed to check if user exists: %w", err)
 	}

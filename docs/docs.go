@@ -10,6 +10,10 @@ const docTemplate = `{
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
         "contact": {},
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
@@ -23,6 +27,9 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "users"
                 ],
                 "summary": "Create a new user",
                 "parameters": [
@@ -61,8 +68,14 @@ const docTemplate = `{
         "/users/{username}": {
             "get": {
                 "description": "Get user details by username",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "users"
                 ],
                 "summary": "Get a user by username",
                 "parameters": [
@@ -109,6 +122,9 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "users"
+                ],
                 "summary": "Update a user's subscription status",
                 "parameters": [
                     {
@@ -154,6 +170,9 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "users"
+                ],
                 "summary": "Delete a user by username",
                 "parameters": [
                     {
@@ -188,6 +207,9 @@ const docTemplate = `{
                 "description": "Check if a user exists by their username",
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "users"
                 ],
                 "summary": "Check if a user exists by username",
                 "parameters": [
@@ -226,6 +248,9 @@ const docTemplate = `{
                 "description": "Get the subscription status of a user by their username",
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "users"
                 ],
                 "summary": "Get subscription status of a user by username",
                 "parameters": [
@@ -275,6 +300,10 @@ const docTemplate = `{
                 },
                 "subscription_status": {
                     "type": "string"
+                },
+                "traffic": {
+                    "description": "in Mb",
+                    "type": "number"
                 },
                 "username": {
                     "type": "string"

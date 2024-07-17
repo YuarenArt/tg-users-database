@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	_ "tg-users-database/docs"
 	"tg-users-database/pkg/db"
 	"tg-users-database/pkg/user"
 )
@@ -54,6 +55,7 @@ func (h *UserHandler) setupRouter() {
 // createUser handles the creation of a new user.
 // @Summary Create a new user
 // @Description Create a new user with the provided details
+// @Tags users
 // @Accept json
 // @Produce json
 // @Param user body user.User true "User details"
@@ -82,6 +84,8 @@ func (h *UserHandler) createUser(c *gin.Context) {
 // getUser handles retrieving a user by username.
 // @Summary Get a user by username
 // @Description Get user details by username
+// @Tags users
+// @Accept json
 // @Produce json
 // @Param username path string true "Username"
 // @Success 200 {object} user.User
@@ -111,6 +115,7 @@ func (h *UserHandler) getUser(c *gin.Context) {
 // updateUser handles updating a user's subscription status.
 // @Summary Update a user's subscription status
 // @Description Update the subscription status of a user by username
+// @Tags users
 // @Accept json
 // @Produce json
 // @Param username path string true "Username"
@@ -141,6 +146,7 @@ func (h *UserHandler) updateUser(c *gin.Context) {
 // deleteUser handles deleting a user by username.
 // @Summary Delete a user by username
 // @Description Delete a user by their username
+// @Tags users
 // @Produce json
 // @Param username path string true "Username"
 // @Success 204 {object} nil
@@ -164,6 +170,7 @@ func (h *UserHandler) deleteUser(c *gin.Context) {
 // getSubscriptionStatus handles retrieving the subscription status of a user by username.
 // @Summary Get subscription status of a user by username
 // @Description Get the subscription status of a user by their username
+// @Tags users
 // @Produce json
 // @Param username path string true "Username"
 // @Success 200 {string} string "Subscription status"
@@ -189,6 +196,7 @@ func (h *UserHandler) getSubscriptionStatus(c *gin.Context) {
 // checkUserExists handles checking if a user exists by username.
 // @Summary Check if a user exists by username
 // @Description Check if a user exists by their username
+// @Tags users
 // @Produce json
 // @Param username path string true "Username"
 // @Success 200 {bool} bool "User exists or not"

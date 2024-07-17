@@ -6,13 +6,14 @@ import (
 	"tg-users-database/pkg/handler"
 )
 
-// TODO use RESTful
-// TODO generate documentation with swagger
-// TODO создать обработчик для документирования
+// TODO add fucntion for recording traffic from user
 
 // @title User Database API
 // @version 1.0
 // @description This is a sample server for managing user subscriptions.
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
 // @host localhost:8082
 // @BasePath /
