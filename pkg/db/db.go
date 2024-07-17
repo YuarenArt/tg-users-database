@@ -7,6 +7,7 @@ import (
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
+	"strings"
 	"tg-users-database/pkg/user"
 )
 
@@ -52,19 +53,24 @@ func NewDatabase(dataSourceName string) (*Database, error) {
 
 // CreateUser adds a new user to the database
 func (db *Database) CreateUser(ctx context.Context, usr *user.User) error {
-	log.Printf("Preparing to insert user: %s", usr.TelegramUsername)
+	log.Printf("Preparing to insert user: %s", usr.Username)
+
+	if strings.TrimSpace(usr.Username) == "" {
+		return errors.New("unsupported username")
+	}
+
 	stmt, err := db.DB.PrepareContext(ctx, insertUserSQL)
 	if err != nil {
 		return fmt.Errorf("failed to prepare insert statement: %w", err)
 	}
 	defer stmt.Close()
 
-	_, err = stmt.ExecContext(ctx, usr.TelegramUsername, usr.SubscriptionStatus)
+	_, err = stmt.ExecContext(ctx, usr.Username, usr.SubscriptionStatus)
 	if err != nil {
 		return fmt.Errorf("failed to execute insert statement: %w", err)
 	}
 
-	log.Printf("User %s created successfully.", usr.TelegramUsername)
+	log.Printf("User %s created successfully.", usr.Username)
 	return nil
 }
 
@@ -74,11 +80,11 @@ func (db *Database) GetUser(ctx context.Context, username string) (*user.User, e
 	var usr user.User
 	row := db.DB.QueryRowContext(ctx, selectUserSQL, username)
 
-	err := row.Scan(&usr.ID, &usr.TelegramUsername, &usr.SubscriptionStatus)
+	err := row.Scan(&usr.ID, &usr.Username, &usr.SubscriptionStatus)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			log.Printf("User %s not found.", username)
-			return nil, nil
+			return nil, err
 		}
 		return nil, fmt.Errorf("failed to scan row: %w", err)
 	}
