@@ -11,7 +11,7 @@ const docTemplate = `{
         "title": "{{.Title}}",
         "contact": {},
         "license": {
-            "name": "Apache 2.0",
+            "name": "Apache 2.1",
             "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
         },
         "version": "{{.Version}}"
@@ -21,7 +21,12 @@ const docTemplate = `{
     "paths": {
         "/users": {
             "post": {
-                "description": "Create a new user with the provided details",
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Create a new User with the provided details",
                 "consumes": [
                     "application/json"
                 ],
@@ -31,15 +36,15 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "Create a new user",
+                "summary": "Create a new User",
                 "parameters": [
                     {
                         "description": "User details",
-                        "name": "user",
+                        "name": "User",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/user.User"
+                            "$ref": "#/definitions/db.User"
                         }
                     }
                 ],
@@ -47,19 +52,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/user.User"
+                            "$ref": "#/definitions/db.User"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
@@ -67,7 +72,12 @@ const docTemplate = `{
         },
         "/users/{username}": {
             "get": {
-                "description": "Get user details by username",
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get User details by username",
                 "consumes": [
                     "application/json"
                 ],
@@ -77,7 +87,7 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "Get a user by username",
+                "summary": "Get a User by username",
                 "parameters": [
                     {
                         "type": "string",
@@ -91,31 +101,36 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/user.User"
+                            "$ref": "#/definitions/db.User"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
             },
             "put": {
-                "description": "Update the subscription status of a user by username",
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Update the subscription status of a User by username",
                 "consumes": [
                     "application/json"
                 ],
@@ -125,7 +140,7 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "Update a user's subscription status",
+                "summary": "Update a User's subscription status",
                 "parameters": [
                     {
                         "type": "string",
@@ -135,12 +150,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Updated user details",
-                        "name": "user",
+                        "description": "Updated User details",
+                        "name": "User",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/user.User"
+                            "$ref": "#/definitions/db.User"
                         }
                     }
                 ],
@@ -148,32 +163,43 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/user.User"
+                            "$ref": "#/definitions/db.User"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
             },
             "delete": {
-                "description": "Delete a user by their username",
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete a User by their username",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "users"
                 ],
-                "summary": "Delete a user by username",
+                "summary": "Delete a User by username",
                 "parameters": [
                     {
                         "type": "string",
@@ -190,13 +216,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
@@ -204,14 +230,19 @@ const docTemplate = `{
         },
         "/users/{username}/exists": {
             "get": {
-                "description": "Check if a user exists by their username",
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Check if a User exists by their username",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "users"
                 ],
-                "summary": "Check if a user exists by username",
+                "summary": "Check if a User exists by username",
                 "parameters": [
                     {
                         "type": "string",
@@ -231,13 +262,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
@@ -245,14 +276,19 @@ const docTemplate = `{
         },
         "/users/{username}/subscription": {
             "get": {
-                "description": "Get the subscription status of a user by their username",
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get the subscription status of a User by their username",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "users"
                 ],
-                "summary": "Get subscription status of a user by username",
+                "summary": "Get subscription status of a User by username",
                 "parameters": [
                     {
                         "type": "string",
@@ -272,19 +308,83 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{username}/traffic": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Update the traffic used by a User identified by username",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Update the amount of traffic used by a User",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Username",
+                        "name": "username",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Traffic used in MB",
+                        "name": "traffic",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "number"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }
@@ -292,14 +392,39 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "user.User": {
+        "db.Subscription": {
             "type": "object",
             "properties": {
+                "duration": {
+                    "description": "month, year, forever",
+                    "type": "string"
+                },
+                "end_subscription": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
-                "subscription_status": {
+                "start_subscription": {
                     "type": "string"
+                },
+                "subscription_status": {
+                    "description": "active, inactive",
+                    "type": "string"
+                }
+            }
+        },
+        "db.User": {
+            "type": "object",
+            "properties": {
+                "chat_id": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "subscription": {
+                    "$ref": "#/definitions/db.Subscription"
                 },
                 "traffic": {
                     "description": "in Mb",
@@ -309,17 +434,40 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "handler.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.SuccessResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "Bearer": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0",
+	Version:          "2.0",
 	Host:             "localhost:8082",
 	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "User Database API",
+	Title:            "user Database API",
 	Description:      "This is a sample server for managing user subscriptions.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

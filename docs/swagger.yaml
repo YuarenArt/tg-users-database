@@ -1,15 +1,42 @@
 basePath: /
 definitions:
-  user.User:
+  db.Subscription:
     properties:
+      duration:
+        description: month, year, forever
+        type: string
+      end_subscription:
+        type: string
       id:
         type: integer
-      subscription_status:
+      start_subscription:
         type: string
+      subscription_status:
+        description: active, inactive
+        type: string
+    type: object
+  db.User:
+    properties:
+      chat_id:
+        type: integer
+      id:
+        type: integer
+      subscription:
+        $ref: '#/definitions/db.Subscription'
       traffic:
         description: in Mb
         type: number
       username:
+        type: string
+    type: object
+  handler.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  handler.SuccessResponse:
+    properties:
+      message:
         type: string
     type: object
 host: localhost:8082
@@ -17,44 +44,46 @@ info:
   contact: {}
   description: This is a sample server for managing user subscriptions.
   license:
-    name: Apache 2.0
+    name: Apache 2.1
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  title: User Database API
-  version: "1.0"
+  title: user Database API
+  version: "2.0"
 paths:
   /users:
     post:
       consumes:
       - application/json
-      description: Create a new user with the provided details
+      description: Create a new User with the provided details
       parameters:
       - description: User details
         in: body
-        name: user
+        name: User
         required: true
         schema:
-          $ref: '#/definitions/user.User'
+          $ref: '#/definitions/db.User'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/user.User'
+            $ref: '#/definitions/db.User'
         "400":
           description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/handler.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            type: string
-      summary: Create a new user
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Create a new User
       tags:
       - users
   /users/{username}:
     delete:
-      description: Delete a user by their username
+      description: Delete a User by their username
       parameters:
       - description: Username
         in: path
@@ -69,18 +98,20 @@ paths:
         "400":
           description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/handler.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            type: string
-      summary: Delete a user by username
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Delete a User by username
       tags:
       - users
     get:
       consumes:
       - application/json
-      description: Get user details by username
+      description: Get User details by username
       parameters:
       - description: Username
         in: path
@@ -93,59 +124,67 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/user.User'
+            $ref: '#/definitions/db.User'
         "400":
           description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/handler.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            type: string
+            $ref: '#/definitions/handler.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            type: string
-      summary: Get a user by username
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get a User by username
       tags:
       - users
     put:
       consumes:
       - application/json
-      description: Update the subscription status of a user by username
+      description: Update the subscription status of a User by username
       parameters:
       - description: Username
         in: path
         name: username
         required: true
         type: string
-      - description: Updated user details
+      - description: Updated User details
         in: body
-        name: user
+        name: User
         required: true
         schema:
-          $ref: '#/definitions/user.User'
+          $ref: '#/definitions/db.User'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/user.User'
+            $ref: '#/definitions/db.User'
         "400":
           description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            type: string
-      summary: Update a user's subscription status
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Update a User's subscription status
       tags:
       - users
   /users/{username}/exists:
     get:
-      description: Check if a user exists by their username
+      description: Check if a User exists by their username
       parameters:
       - description: Username
         in: path
@@ -162,17 +201,19 @@ paths:
         "400":
           description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/handler.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            type: string
-      summary: Check if a user exists by username
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Check if a User exists by username
       tags:
       - users
   /users/{username}/subscription:
     get:
-      description: Get the subscription status of a user by their username
+      description: Get the subscription status of a User by their username
       parameters:
       - description: Username
         in: path
@@ -189,16 +230,64 @@ paths:
         "400":
           description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/handler.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            type: string
+            $ref: '#/definitions/handler.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            type: string
-      summary: Get subscription status of a user by username
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get subscription status of a User by username
       tags:
       - users
+  /users/{username}/traffic:
+    put:
+      consumes:
+      - application/json
+      description: Update the traffic used by a User identified by username
+      parameters:
+      - description: Username
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: Traffic used in MB
+        in: body
+        name: traffic
+        required: true
+        schema:
+          type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Update the amount of traffic used by a User
+      tags:
+      - users
+securityDefinitions:
+  Bearer:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

@@ -20,6 +20,10 @@ RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 
 COPY --from=builder /main .
+COPY .env .env
+COPY cert.pem key.pem /root/
+
+RUN mkdir -p /root/docs
 
 ENV GIN_MODE=release
 
