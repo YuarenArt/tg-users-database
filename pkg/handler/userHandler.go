@@ -27,42 +27,39 @@ const (
 type UserHandler struct {
 	Database *db.Database
 	Router   *gin.Engine
+	botToken string
 }
 
 // NewHandler creates a new UserHandler with an initialized router.
 func NewHandler(database *db.Database) *UserHandler {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+	}
+
+	botToken := os.Getenv("BOT_TOKEN")
+	if botToken == "" {
+		log.Fatal("BOT_TOKEN is not set")
+	}
+
 	handler := &UserHandler{
 		Database: database,
 		Router:   gin.Default(),
+		botToken: botToken,
 	}
 	handler.setupRouter()
 	return handler
 }
 
-var botToken string
-
-func init() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
-	}
-	botToken = os.Getenv("BOT_TOKEN")
-	if botToken == "" {
-		log.Fatal("BOT_TOKEN is not set")
-	}
-}
-
-func BotAuthMiddleware() gin.HandlerFunc {
-
+func (h *UserHandler) BotAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-
 		if strings.HasPrefix(c.Request.URL.Path, "/swagger") {
 			c.Next()
 			return
 		}
 
 		token := c.GetHeader("Authorization")
-		if token != "Bearer "+botToken {
+		if token != "Bearer "+h.botToken {
 			logRequestDetails(c, "incorrect bot token")
 			c.JSON(http.StatusUnauthorized, ErrorResponse{Error: "Unauthorized"})
 			c.Abort()
@@ -87,7 +84,7 @@ func logRequestDetails(c *gin.Context, message string) {
 func (h *UserHandler) setupRouter() {
 	h.Router.Use(gin.Logger())
 	h.Router.Use(gin.Recovery())
-	h.Router.Use(BotAuthMiddleware())
+	h.Router.Use(h.BotAuthMiddleware())
 
 	// CORS configuration
 	h.Router.Use(cors.New(cors.Config{
