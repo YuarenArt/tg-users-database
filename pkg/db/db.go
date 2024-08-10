@@ -13,7 +13,6 @@ import (
 )
 
 type User struct {
-	ID           int64        `json:"id"`
 	Username     string       `json:"username"`
 	Subscription Subscription `json:"subscription"`
 	Traffic      float64      `json:"traffic"`
@@ -37,8 +36,7 @@ type Database struct {
 const (
 	createTableUsers = `
     CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT NOT NULL UNIQUE,
+        username TEXT PRIMARY KEY,
         subscription_id INTEGER NOT NULL,
         traffic REAL DEFAULT 0,
         chat_id INTEGER,
@@ -55,7 +53,7 @@ const (
     );`
 
 	selectUserSQL = `
-    		SELECT  users.id, users.username, users.traffic, users.chat_id, 
+    		SELECT  users.username, users.traffic, users.chat_id, 
            			subscriptions.id, subscriptions.subscription_status, 
           			subscriptions.duration, subscriptions.start_subscription, subscriptions.end_subscription
     		FROM users 
@@ -87,7 +85,7 @@ const (
 	allUsername          = "SELECT username FROM users"
 )
 
-const timeFormat = "2006-01-02T15:04:05Z07:00"
+const timeFormat = "2006-01-02T15:04:05Z"
 
 // TODO add function for clearing unused subscription
 
@@ -193,7 +191,6 @@ func (db *Database) User(ctx context.Context, username string) (*User, error) {
 	var startSubscription, endSubscription string
 
 	err := row.Scan(
-		&usr.ID,
 		&usr.Username,
 		&usr.Traffic,
 		&usr.ChatID,

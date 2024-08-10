@@ -19,12 +19,9 @@ definitions:
     properties:
       chat_id:
         type: integer
-      id:
-        type: integer
       subscription:
         $ref: '#/definitions/db.Subscription'
       traffic:
-        description: in Mb
         type: number
       username:
         type: string
@@ -42,12 +39,12 @@ definitions:
 host: localhost:8082
 info:
   contact: {}
-  description: This is a sample server for managing user subscriptions.
+  description: This is a sample server for managing user subscriptions over HTTPS.
   license:
-    name: Apache 2.1
+    name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   title: user Database API
-  version: "2.0"
+  version: "2.2"
 paths:
   /users:
     post:
@@ -285,6 +282,8 @@ paths:
       summary: Update the amount of traffic used by a User
       tags:
       - users
+schemes:
+- https
 securityDefinitions:
   Bearer:
     in: header

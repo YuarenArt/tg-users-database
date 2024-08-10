@@ -11,7 +11,7 @@ const docTemplate = `{
         "title": "{{.Title}}",
         "contact": {},
         "license": {
-            "name": "Apache 2.1",
+            "name": "Apache 2.0",
             "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
         },
         "version": "{{.Version}}"
@@ -420,14 +420,10 @@ const docTemplate = `{
                 "chat_id": {
                     "type": "integer"
                 },
-                "id": {
-                    "type": "integer"
-                },
                 "subscription": {
                     "$ref": "#/definitions/db.Subscription"
                 },
                 "traffic": {
-                    "description": "in Mb",
                     "type": "number"
                 },
                 "username": {
@@ -463,12 +459,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "2.0",
+	Version:          "2.2",
 	Host:             "localhost:8082",
 	BasePath:         "/",
-	Schemes:          []string{},
+	Schemes:          []string{"https"},
 	Title:            "user Database API",
-	Description:      "This is a sample server for managing user subscriptions.",
+	Description:      "This is a sample server for managing user subscriptions over HTTPS.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

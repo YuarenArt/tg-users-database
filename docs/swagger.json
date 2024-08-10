@@ -1,14 +1,17 @@
 {
+    "schemes": [
+        "https"
+    ],
     "swagger": "2.0",
     "info": {
-        "description": "This is a sample server for managing user subscriptions.",
+        "description": "This is a sample server for managing user subscriptions over HTTPS.",
         "title": "user Database API",
         "contact": {},
         "license": {
-            "name": "Apache 2.1",
+            "name": "Apache 2.0",
             "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
         },
-        "version": "2.0"
+        "version": "2.2"
     },
     "host": "localhost:8082",
     "basePath": "/",
@@ -414,14 +417,10 @@
                 "chat_id": {
                     "type": "integer"
                 },
-                "id": {
-                    "type": "integer"
-                },
                 "subscription": {
                     "$ref": "#/definitions/db.Subscription"
                 },
                 "traffic": {
-                    "description": "in Mb",
                     "type": "number"
                 },
                 "username": {
