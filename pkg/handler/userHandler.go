@@ -318,7 +318,7 @@ func (h *UserHandler) subscriptionStatus(c *gin.Context) {
 // @Tags users
 // @Produce json
 // @Param username path string true "Username"
-// @Success 200 {bool} bool "User exists or not"
+// @Success 200 {bool} boolean "User exists or not"
 // @Failure 400 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
 // @Security Bearer
