@@ -39,7 +39,7 @@ definitions:
 host: localhost:8082
 info:
   contact: {}
-  description: This is a sample server for managing user subscriptions over HTTPS.
+  description: This is a server for managing user subscriptions over HTTPS.
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html

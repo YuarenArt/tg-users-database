@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"tg-users-database/pkg/db"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // TODO creates func for generating test cases

@@ -2,32 +2,42 @@ package handler
 
 import (
 	"context"
-	"github.com/gin-contrib/cors"
-	"github.com/joho/godotenv"
 	"log"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/gin-contrib/cors"
+	"github.com/joho/godotenv"
+
+	_ "tg-users-database/docs"
+	"tg-users-database/pkg/db"
+
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	_ "tg-users-database/docs"
-	"tg-users-database/pkg/db"
 )
 
 const (
 	timeoutToContext = 60 * time.Second
 )
 
-// TODO сделать доступ и по паролю и по токену
-
 // UserHandler contains the dependencies for the HTTPS handlers and the router.
 type UserHandler struct {
 	Database *db.Database
 	Router   *gin.Engine
 	botToken string
+}
+
+// ErrorResponse represents an error response.
+type ErrorResponse struct {
+	Error string `json:"error"`
+}
+
+// SuccessResponse represents a success response.
+type SuccessResponse struct {
+	Message string `json:"message"`
 }
 
 // NewHandler creates a new UserHandler with an initialized router.
@@ -109,16 +119,6 @@ func (h *UserHandler) setupRouter() {
 
 	// Swagger endpoint without BotAuthMiddleware
 	h.Router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-}
-
-// ErrorResponse represents an error response.
-type ErrorResponse struct {
-	Error string `json:"error"`
-}
-
-// SuccessResponse represents a success response.
-type SuccessResponse struct {
-	Message string `json:"message"`
 }
 
 // checkUserExists checks if a user exists and handles errors.

@@ -464,7 +464,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/",
 	Schemes:          []string{"https"},
 	Title:            "user Database API",
-	Description:      "This is a sample server for managing user subscriptions over HTTPS.",
+	Description:      "This is a server for managing user subscriptions over HTTPS.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

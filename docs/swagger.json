@@ -4,7 +4,7 @@
     ],
     "swagger": "2.0",
     "info": {
-        "description": "This is a sample server for managing user subscriptions over HTTPS.",
+        "description": "This is a server for managing user subscriptions over HTTPS.",
         "title": "user Database API",
         "contact": {},
         "license": {

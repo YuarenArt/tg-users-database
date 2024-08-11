@@ -9,7 +9,7 @@ import (
 
 // @title user Database API
 // @version 2.2
-// @description This is a sample server for managing user subscriptions over HTTPS.
+// @description This is a server for managing user subscriptions over HTTPS.
 
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html

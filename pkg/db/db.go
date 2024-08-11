@@ -5,11 +5,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"strings"
 	"sync"
 	"time"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type User struct {
@@ -40,7 +41,7 @@ const (
         subscription_id INTEGER NOT NULL,
         traffic REAL DEFAULT 0,
         chat_id INTEGER,
-        FOREIGN KEY (subscription_id) REFERENCES subscriptions(id)
+        FOREIGN KEY (subscription_id) REFERENCES subscriptions(id) ON DELETE CASCADE
     );`
 
 	createTableSubscriptions = `
@@ -87,10 +88,6 @@ const (
 
 const timeFormat = "2006-01-02T15:04:05Z"
 
-// TODO add function for clearing unused subscription
-
-// TODO delte id from User
-
 var dbInitMu sync.Mutex
 
 // NewDatabase initializes and returns a new Database instance
@@ -126,7 +123,7 @@ func NewDatabase(dataSourceName string) (*Database, error) {
 	}, nil
 }
 
-func formatTime(t time.Time) string {
+func FormatTime(t time.Time) string {
 	return t.Format(timeFormat)
 }
 
@@ -138,8 +135,8 @@ func (db *Database) addSubscription(ctx context.Context, subscription *Subscript
 	}
 	defer stmt.Close()
 
-	startSubscription := formatTime(subscription.StartSubscription)
-	endSubscription := formatTime(subscription.EndSubscription)
+	startSubscription := FormatTime(subscription.StartSubscription)
+	endSubscription := FormatTime(subscription.EndSubscription)
 
 	res, err := stmt.ExecContext(ctx, subscription.SubscriptionStatus, subscription.Duration, startSubscription, endSubscription)
 	if err != nil {
@@ -244,8 +241,8 @@ func (db *Database) UpdateUserSubscription(ctx context.Context, username string,
 	}
 	defer stmt.Close()
 
-	startSubscription := formatTime(newSubscription.StartSubscription)
-	endSubscription := formatTime(newSubscription.EndSubscription)
+	startSubscription := FormatTime(newSubscription.StartSubscription)
+	endSubscription := FormatTime(newSubscription.EndSubscription)
 
 	_, err = stmt.ExecContext(ctx, newSubscription.SubscriptionStatus, newSubscription.Duration, startSubscription, endSubscription, username)
 	if err != nil {
