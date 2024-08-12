@@ -14,7 +14,7 @@ const (
 
 var schedulerPlans = map[string]string{
 	resetTraffic:       "@weekly",
-	checkSubscriptions: "@every 1m",
+	checkSubscriptions: "@daily",
 }
 
 // Task represents a task to be executed by the scheduler
