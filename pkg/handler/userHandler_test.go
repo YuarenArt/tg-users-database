@@ -7,8 +7,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"tg-users-database/pkg/db"
 	"time"
+
+	"github.com/YuarenArt/tg-users-database/pkg/db"
 
 	"github.com/stretchr/testify/assert"
 )
