@@ -2,7 +2,8 @@ package scheduler
 
 import (
 	"log"
-	"tg-users-database/pkg/db"
+
+	"github.com/YuarenArt/tg-users-database/pkg/db"
 
 	"github.com/robfig/cron"
 )

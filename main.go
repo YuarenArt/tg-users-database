@@ -2,9 +2,10 @@ package main
 
 import (
 	"log"
-	"tg-users-database/pkg/db"
-	"tg-users-database/pkg/handler"
-	"tg-users-database/pkg/scheduler"
+
+	"github.com/YuarenArt/tg-users-database/pkg/db"
+	"github.com/YuarenArt/tg-users-database/pkg/handler"
+	"github.com/YuarenArt/tg-users-database/pkg/scheduler"
 )
 
 // @title user Database API

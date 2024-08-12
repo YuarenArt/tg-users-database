@@ -11,8 +11,8 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/joho/godotenv"
 
-	_ "tg-users-database/docs"
-	"tg-users-database/pkg/db"
+	_ "github.com/YuarenArt/tg-users-database/docs"
+	"github.com/YuarenArt/tg-users-database/pkg/db"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
