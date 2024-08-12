@@ -1,4 +1,4 @@
-module tg-users-database
+module github.com/YuarenArt/tg-users-database
 
 go 1.21
 
