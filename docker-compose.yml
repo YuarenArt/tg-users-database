@@ -1,0 +1,25 @@
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER:
+      POSTGRES_PASSWORD:
+      POSTGRES_DB:
+    ports:
+      - "5432:5432"
+
+  tg-database:
+    build: .
+    container_name: tg-database1
+    depends_on:
+      - db
+    ports:
+      - "8082:8082"
+    environment:
+      BOT_TOKEN:
+      DB_USER:
+      DB_PASSWORD:
+      DB_NAME: users
+      DB_SSLMODE: disable
+      HOST: db
+      PORT: 5432

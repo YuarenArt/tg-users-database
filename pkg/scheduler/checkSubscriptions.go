@@ -21,6 +21,13 @@ func (s *Scheduler) checkAndUpdateSubscriptions() {
 			log.Printf("Failed to get user %s: %v", username, err)
 		}
 
+		if user.Subscription.SubscriptionStatus == "inactive" && user.Subscription.EndSubscription.After(time.Now()) {
+			user.Subscription.SubscriptionStatus = "active"
+			if err := s.db.UpdateUserSubscription(ctx, username, user.Subscription); err != nil {
+				log.Printf("Failed to update subscription for user %s: %v", user.Username, err)
+			}
+		}
+
 		if user.Subscription.SubscriptionStatus == "active" && user.Subscription.EndSubscription.Before(time.Now()) {
 			log.Printf("Subscription expired for user %s, updating status to inactive.", user.Username)
 			user.Subscription.SubscriptionStatus = "inactive"

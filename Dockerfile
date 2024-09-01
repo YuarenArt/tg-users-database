@@ -1,5 +1,6 @@
 ARG GO_VERSION=1.21
 ARG ALPINE_VERSION=latest
+
 FROM golang:${GO_VERSION}-alpine as builder
 
 RUN apk add --no-cache git gcc musl-dev
@@ -15,7 +16,7 @@ RUN go build -o /main .
 
 FROM alpine:${ALPINE_VERSION}
 
-RUN apk --no-cache add ca-certificates
+RUN apk --no-cache add ca-certificates postgresql-client
 
 WORKDIR /root/
 

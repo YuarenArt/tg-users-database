@@ -199,7 +199,7 @@ func (h *UserHandler) user(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-// updateUserSubscription handles updating a User's subscription status.
+// updateUserSubscription handles updating a User's subscription.
 // @Summary Update a User's subscription status
 // @Description Update the subscription status of a User by username
 // @Tags users
@@ -332,6 +332,11 @@ func (h *UserHandler) isUserExists(c *gin.Context) {
 	exist, err := h.Database.IsUserExists(ctx, username)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	if !exist {
+		c.JSON(http.StatusNotFound, exist)
 		return
 	}
 

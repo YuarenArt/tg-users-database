@@ -6,11 +6,14 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"sync"
 	"time"
 
-	_ "github.com/mattn/go-sqlite3"
+	"github.com/joho/godotenv"
+
+	_ "github.com/lib/pq"
 )
 
 type User struct {
@@ -38,19 +41,19 @@ const (
 	createTableUsers = `
     CREATE TABLE IF NOT EXISTS users (
         username TEXT PRIMARY KEY,
-        subscription_id INTEGER NOT NULL,
+        subscription_id SERIAL NOT NULL,
         traffic REAL DEFAULT 0,
-        chat_id INTEGER,
+        chat_id BIGINT,
         FOREIGN KEY (subscription_id) REFERENCES subscriptions(id) ON DELETE CASCADE
     );`
 
 	createTableSubscriptions = `
     CREATE TABLE IF NOT EXISTS subscriptions (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        subscription_status TEXT DEFAULT "inactive",
-        duration TEXT NOT NULL,
-        start_subscription DATE NOT NULL,
-        end_subscription DATE NOT NULL
+        id SERIAL PRIMARY KEY,
+        subscription_status TEXT DEFAULT 'inactive',
+        duration TEXT NOT NULL DEFAULT 'month',
+        start_subscription TIMESTAMP NOT NULL,
+        end_subscription TIMESTAMP NOT NULL
     );`
 
 	selectUserSQL = `
@@ -59,51 +62,99 @@ const (
           			subscriptions.duration, subscriptions.start_subscription, subscriptions.end_subscription
     		FROM users 
     		JOIN subscriptions ON users.subscription_id = subscriptions.id 
-    		WHERE users.username = ?`
+    		WHERE users.username = $1`
 
 	updateUserSubscriptionSQL = `
     		UPDATE subscriptions 
-   	 		SET subscription_status = ?, duration = ?, start_subscription = ?, end_subscription = ?
-    		WHERE id = (SELECT subscription_id FROM users WHERE username = ?)`
+        	SET subscription_status = $1, duration = $2, start_subscription = $3, end_subscription = $4
+        	WHERE id = (SELECT subscription_id FROM users WHERE username = $5)`
 
 	userSubscriptionStatusSQL = `
-								SELECT subscriptions.subscription_status 
-								FROM users 
-								JOIN subscriptions ON users.subscription_id = subscriptions.id 
-								WHERE users.username = ?`
+			SELECT subscriptions.subscription_status 
+			FROM users 
+			JOIN subscriptions ON users.subscription_id = subscriptions.id 
+			WHERE users.username = $1`
 
 	deleteSubscriptionIfUnusedSQL = `
-    		DELETE FROM subscriptions 
-    		WHERE id = ? AND NOT EXISTS (
-       	    SELECT 1 FROM users WHERE subscription_id = ?)`
+            DELETE FROM subscriptions 
+            WHERE id = $1 AND NOT EXISTS (SELECT 1 FROM users WHERE subscription_id = $1)`
+	unusedSubscriptionsSQL = `
+            SELECT id FROM subscriptions 
+            WHERE NOT EXISTS (SELECT 1 FROM users WHERE users.subscription_id = subscriptions.id)`
 
-	insertUserSQL        = "INSERT INTO users (username, subscription_id, chat_id) VALUES (?, ?, ?)"
-	deleteUserSQL        = "DELETE FROM users WHERE username = ?"
-	userExistsSQL        = "SELECT EXISTS(SELECT 1 FROM users WHERE username = ?)"
-	addSubscription      = "INSERT INTO subscriptions (subscription_status, duration, start_subscription, end_subscription) VALUES (?, ?, ?, ?)"
-	subscriptionId       = "SELECT subscription_id FROM users WHERE username = ?"
-	updateUserTrafficSQL = "UPDATE users SET traffic = ? WHERE username = ?"
+	insertUserSQL        = "INSERT INTO users (username, subscription_id, chat_id) VALUES ($1, $2, $3)"
+	deleteUserSQL        = "DELETE FROM users WHERE username = $1"
+	userExistsSQL        = "SELECT EXISTS(SELECT 1 FROM users WHERE username = $1)"
+	addSubscription      = "INSERT INTO subscriptions (subscription_status, duration, start_subscription, end_subscription) VALUES ($1, $2, $3, $4) RETURNING id"
+	subscriptionId       = "SELECT subscription_id FROM users WHERE username = $1"
+	updateUserTrafficSQL = "UPDATE users SET traffic = $1 WHERE username = $2"
 	allUsername          = "SELECT username FROM users"
 )
 
-const timeFormat = "2006-01-02T15:04:05Z"
+const timeFormat = time.RFC3339
+
+func FormatTime(t time.Time) string {
+	return t.Format(timeFormat)
+}
 
 var dbInitMu sync.Mutex
 
+/*
+var (
+	pgInstance *Database
+	pgOnce     sync.Once
+)
+*/
 // NewDatabase initializes and returns a new Database instance
 func NewDatabase(dataSourceName string) (*Database, error) {
 	dbInitMu.Lock()
 	defer dbInitMu.Unlock()
 
 	log.Println("Opening database connection...")
-	db, err := sql.Open("sqlite3", dataSourceName)
+
+	err := godotenv.Load()
 	if err != nil {
-		return nil, fmt.Errorf("failed to open database: %w", err)
+		log.Fatalf("Error loading .env file: %v", err)
+	}
+
+	user := os.Getenv("DB_USER")
+	password := os.Getenv("DB_PASSWORD")
+	dbname := os.Getenv("DB_NAME")
+	sslmode := os.Getenv("DB_SSLMODE")
+	host := os.Getenv("HOST")
+	port := os.Getenv("PORT")
+	defaultConnStr := fmt.Sprintf(
+		"user=%s password=%s dbname=postgres host=%s port=%s sslmode=%s",
+		user, password, host, port, sslmode,
+	)
+
+	log.Println("defaultConnStr: ", defaultConnStr)
+
+	defaultDB, err := sql.Open("postgres", defaultConnStr)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open default database: %w", err)
+	}
+	defer defaultDB.Close()
+
+	// Create the new database
+	_, err = defaultDB.Exec("CREATE DATABASE users")
+	if err != nil && err.Error() != "pq: database \"users\" already exists" {
+		log.Printf("failed to create database: %s", err.Error())
+	}
+
+	// Connect to the newly created database
+	ConnStr := fmt.Sprintf(
+		"user=%s password=%s dbname=%s host=%s port=%s sslmode=%s",
+		user, password, dbname, host, port, sslmode,
+	)
+	db, err := sql.Open("postgres", ConnStr)
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to the new database: %w", err)
 	}
 
 	db.SetMaxOpenConns(25)
 	db.SetMaxIdleConns(25)
-	db.SetConnMaxLifetime(5 * time.Minute)
+	db.SetConnMaxLifetime(time.Hour)
 
 	// Initialize subscriptions table
 	_, err = db.Exec(createTableSubscriptions)
@@ -116,33 +167,75 @@ func NewDatabase(dataSourceName string) (*Database, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to create users table: %w", err)
 	}
+
+	// Create a new Database instance
+	newDB := &Database{
+		DB: db,
+	}
+
+	// Clean up unused subscriptions
+	err = newDB.cleanupUnusedSubscriptions(context.Background())
+	if err != nil {
+		return nil, fmt.Errorf("failed to clean up unused subscriptions: %w", err)
+	}
+
 	log.Println("Database connection established successfully.")
 
-	return &Database{
-		DB: db,
-	}, nil
+	return newDB, nil
 }
 
-func FormatTime(t time.Time) string {
-	return t.Format(timeFormat)
+// cleanupUnusedSubscriptions deletes all unused subscriptions
+func (db *Database) cleanupUnusedSubscriptions(ctx context.Context) error {
+	rows, err := db.DB.QueryContext(ctx, unusedSubscriptionsSQL)
+	if err != nil {
+		return fmt.Errorf("failed to execute unused subscriptions query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var subscriptionID int64
+		if err := rows.Scan(&subscriptionID); err != nil {
+			return fmt.Errorf("failed to scan row: %w", err)
+		}
+
+		stmt, err := db.DB.PrepareContext(ctx, deleteSubscriptionIfUnusedSQL)
+		if err != nil {
+			return fmt.Errorf("failed to prepare delete subscription statement: %w", err)
+		}
+		defer stmt.Close()
+
+		_, err = stmt.ExecContext(ctx, subscriptionID)
+		if err != nil {
+			return fmt.Errorf("failed to execute delete subscription statement: %w", err)
+		}
+	}
+
+	if err := rows.Err(); err != nil {
+		return fmt.Errorf("row iteration error: %w", err)
+	}
+
+	return nil
 }
 
-// addSubscription inserts a new subscription into the subscriptions table
-func (db *Database) addSubscription(ctx context.Context, subscription *Subscription) (int64, error) {
+// addSubscription inserts a new empty subscription into the subscriptions table
+func (db *Database) addSubscription(ctx context.Context) (int64, error) {
 	stmt, err := db.DB.PrepareContext(ctx, addSubscription)
 	if err != nil {
 		return 0, fmt.Errorf("failed to prepare subscription insert statement: %w", err)
 	}
 	defer stmt.Close()
 
-	startSubscription := FormatTime(subscription.StartSubscription)
-	endSubscription := FormatTime(subscription.EndSubscription)
+	startSubscription := FormatTime(time.Now())
+	endSubscription := FormatTime(time.Time{})
+	duration := "month"
+	suscriptionStatus := "inactive"
 
-	res, err := stmt.ExecContext(ctx, subscription.SubscriptionStatus, subscription.Duration, startSubscription, endSubscription)
+	var subscriptionID int64
+	err = stmt.QueryRowContext(ctx, suscriptionStatus, duration, startSubscription, endSubscription).Scan(&subscriptionID)
 	if err != nil {
 		return 0, fmt.Errorf("failed to execute subscription insert statement: %w", err)
 	}
-	return res.LastInsertId()
+	return subscriptionID, nil
 }
 
 // CreateUser adds a new user to the database
@@ -156,7 +249,7 @@ func (db *Database) CreateUser(ctx context.Context, user *User) error {
 		return errors.New("unsupported username")
 	}
 
-	subscriptionID, err := db.addSubscription(ctx, &user.Subscription)
+	subscriptionID, err := db.addSubscription(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to add subscription: %w", err)
 	}
@@ -260,15 +353,6 @@ func (db *Database) DeleteUser(ctx context.Context, username string) error {
 
 	log.Printf("Preparing to delete user: %s", username)
 
-	var subscriptionID int64
-	err := db.DB.QueryRowContext(ctx, "SELECT subscription_id FROM users WHERE username = ?", username).Scan(&subscriptionID)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return fmt.Errorf("user %s not found", username)
-		}
-		return fmt.Errorf("failed to get subscription ID: %w", err)
-	}
-
 	stmt, err := db.DB.PrepareContext(ctx, deleteUserSQL)
 	if err != nil {
 		return fmt.Errorf("failed to prepare delete statement: %w", err)
@@ -280,18 +364,7 @@ func (db *Database) DeleteUser(ctx context.Context, username string) error {
 		return fmt.Errorf("failed to execute delete statement: %w", err)
 	}
 
-	stmt, err = db.DB.PrepareContext(ctx, deleteSubscriptionIfUnusedSQL)
-	if err != nil {
-		return fmt.Errorf("failed to prepare delete subscription statement: %w", err)
-	}
-	defer stmt.Close()
-
-	_, err = stmt.ExecContext(ctx, subscriptionID, subscriptionID)
-	if err != nil {
-		return fmt.Errorf("failed to execute delete subscription statement: %w", err)
-	}
-
-	log.Printf("User %s and potentially their subscription deleted successfully.", username)
+	log.Printf("User %s and their subscription deleted successfully.", username)
 	return nil
 }
 
